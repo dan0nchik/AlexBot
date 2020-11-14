@@ -106,11 +106,7 @@ def main():
                                     'что нужно народу. В итоге оказалось, что самое простое и, так сказать, '
                                     'банальное, и вместе с этим непонятное для народа - это просто слово блокчейн.',
                             random_id=random.randint(0, 2 ** 64))
-                    if 'поджопник' in event.obj.message['text'].lower():
-                        vk.messages.send(
-                            peer_id=event.obj.message['peer_id'],
-                            message='Да, ну согласен я',
-                            random_id=random.randint(0, 2 ** 64))
+                 
                     if '!stats' in event.obj.message['text'].lower():
                         vk.messages.send(
                             peer_id=event.obj.message['peer_id'],
