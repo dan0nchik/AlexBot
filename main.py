@@ -3,12 +3,13 @@ import random
 from datetime import datetime
 
 import pandas as pd
+import matplotlib.pyplot as plt
 import requests
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+import threading
 
 now = datetime.now()
-cur_time = now.strftime("%H%M")
 vk_session = vk_api.VkApi(
     token=
     'c3a549d526acda59616b81d2c8817c9ac50b57aefbc1304164df6c1377e8c1d1f676f77dc1fe9348fba77'
@@ -28,9 +29,9 @@ def stat():
 
 
 def graph():
+    
     now = datetime.now()
-    cur_time = now.strftime("%H%M")
-    print(cur_time)
+    cur_time = now.strftime("%H")
     r = requests.get("https://vote-cat.temocenter.ru/api/vote")
     data = r.json()["items"]
     votes = r.json()["votes"]
@@ -39,13 +40,16 @@ def graph():
     with f:
         writer = csv.writer(f)
         writer.writerow(
-            [int(cur_time) / 100, round(votes * data[0]["votes"] / 100), round(votes * data[1]["votes"] / 100),
+            [int(cur_time)+3, round(votes * data[0]["votes"] / 100), round(votes * data[1]["votes"] / 100),
              round(votes * data[2]["votes"] / 100), round(votes * data[3]["votes"] / 100),
              round(votes * data[4]["votes"] / 100)])
     df = pd.read_csv('data.csv')
-    plot = df.plot(x="Time", y=["Gig", "Mashik", "Masharik", "Mashonok", "Smartcat"], kind="bar")
+    df = df.drop_duplicates()
+    plot = df.plot(x="Time", y=["Gig", "Mashik", "Masharik", "Mashonok", "Smartcat"], title="Votes")
+    
     fig = plot.get_figure()
     fig.savefig("output.png")
+    plt.close()
 
 
 def main():
@@ -61,16 +65,15 @@ def main():
                "Привет, не подскажешь, как выйти из этого чата?",
                "Привет, ты можешь мне сейчас позвонить в дискорде?"]
 
-    if int(cur_time) % 10 == 0:
-        # перестраиваем график каждые 10 минут
-        graph()
-
     # не мой код для отправки фото
-    a = vk_session.method('photos.getMessagesUploadServer')
-    b = requests.post(a['upload_url'], files={'photo': open('output.png', 'rb')}).json()
-    c = vk_session.method('photos.saveMessagesPhoto', {'photo': b['photo'], 'server': b['server'], 'hash': b['hash']})[
-        0]
-    graph_img = 'photo{}_{}'.format(c['owner_id'], c['id'])
+    def send_photo():
+        graph()
+        upload = vk_api.VkUpload(vk_session)
+        photo = upload.photo_messages('output.png')
+        owner_id = photo[0]['owner_id']
+        photo_id = photo[0]['id']
+        access_key = photo[0]['access_key']
+        return f'photo{owner_id}_{photo_id}_{access_key}'
 
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW:
@@ -113,7 +116,7 @@ def main():
                             peer_id=event.obj.message['peer_id'],
                             message=stat(),
                             random_id=random.randint(0, 2 ** 64),
-                            attachment=graph_img)
+                            attachment=send_photo())
 
 
                 except TypeError:
