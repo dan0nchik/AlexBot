@@ -28,8 +28,7 @@ def stat():
     return s
 
 
-def graph():
-    
+def graph():    
     now = datetime.now()
     cur_time = now.strftime("%H")
     r = requests.get("https://vote-cat.temocenter.ru/api/vote")
@@ -43,6 +42,8 @@ def graph():
             [int(cur_time)+3, round(votes * data[0]["votes"] / 100), round(votes * data[1]["votes"] / 100),
              round(votes * data[2]["votes"] / 100), round(votes * data[3]["votes"] / 100),
              round(votes * data[4]["votes"] / 100)])
+
+        
     df = pd.read_csv('data.csv')
     df = df.drop_duplicates()
     plot = df.plot(x="Time", y=["Gig", "Mashik", "Masharik", "Mashonok", "Smartcat"], title="Votes")
@@ -65,7 +66,6 @@ def main():
                "Привет, не подскажешь, как выйти из этого чата?",
                "Привет, ты можешь мне сейчас позвонить в дискорде?"]
 
-    # не мой код для отправки фото
     def send_photo():
         graph()
         upload = vk_api.VkUpload(vk_session)
@@ -106,7 +106,6 @@ def main():
                                     'что нужно народу. В итоге оказалось, что самое простое и, так сказать, '
                                     'банальное, и вместе с этим непонятное для народа - это просто слово блокчейн.',
                             random_id=random.randint(0, 2 ** 64))
-                 
                     if '!stats' in event.obj.message['text'].lower():
                         vk.messages.send(
                             peer_id=event.obj.message['peer_id'],
@@ -129,7 +128,7 @@ def main():
                                 random_id=random.randint(0, 2 ** 64))
                 except TypeError:
                     pass
-                if len(users) > 1000:
+                if len(users) > 10000:
                     users = []
 
 
