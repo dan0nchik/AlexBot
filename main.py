@@ -1,6 +1,5 @@
 import csv
 import random
-from datetime import datetime
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,7 +8,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import threading
 
-now = datetime.now()
+
 vk_session = vk_api.VkApi(
     token=
     'c3a549d526acda59616b81d2c8817c9ac50b57aefbc1304164df6c1377e8c1d1f676f77dc1fe9348fba77'
@@ -29,8 +28,6 @@ def stat():
 
 
 def graph():    
-    now = datetime.now()
-    cur_time = now.strftime("%H")
     r = requests.get("https://vote-cat.temocenter.ru/api/vote")
     data = r.json()["items"]
     votes = r.json()["votes"]
@@ -39,14 +36,15 @@ def graph():
     with f:
         writer = csv.writer(f)
         writer.writerow(
-            [int(cur_time)+3, round(votes * data[0]["votes"] / 100), round(votes * data[1]["votes"] / 100),
+            [round(votes * data[0]["votes"] / 100), round(votes * data[1]["votes"] / 100),
              round(votes * data[2]["votes"] / 100), round(votes * data[3]["votes"] / 100),
              round(votes * data[4]["votes"] / 100)])
 
         
     df = pd.read_csv('data.csv')
+    
     df = df.drop_duplicates()
-    plot = df.plot(x="Time", y=["Gig", "Mashik", "Masharik", "Mashonok", "Smartcat"], title="Votes")
+    plot = df.plot(y=["Gig", "Mashik", "Masharik", "Mashonok", "Smartcat"], title="Votes")
     
     fig = plot.get_figure()
     fig.savefig("output.png")
@@ -54,6 +52,7 @@ def graph():
 
 
 def main():
+    graph()
     users = []
     graph_img = ''
     phrases = ["Привет! Как дела с проектом?",
