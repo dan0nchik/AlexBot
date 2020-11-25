@@ -44,7 +44,7 @@ def graph():
     df = pd.read_csv('data.csv')
     
     df = df.drop_duplicates()
-    plot = df.plot(y=["Gig", "Mashik", "Masharik", "Mashonok", "Smartcat"], title="Votes")
+    plot = df.plot(y=["Гиглавус", "МЭШик", "МЭШарик", "МЭШонок", "Кот Ученый"], title="Votes")
     
     fig = plot.get_figure()
     fig.savefig("output.png")
